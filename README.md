@@ -1,4 +1,4 @@
-# multiplay-mixer
+# multiplay
  
 ```
 flutter pub get
