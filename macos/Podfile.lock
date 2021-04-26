@@ -1,0 +1,53 @@
+PODS:
+  - desktop_window_utils (0.0.1):
+    - FlutterMacOS
+  - file_selector_macos (0.0.1):
+    - FlutterMacOS
+  - flutter_archive (0.0.1):
+    - FlutterMacOS
+    - ZIPFoundation (= 0.9.11)
+  - FlutterMacOS (1.0.0)
+  - menubar (0.0.2):
+    - FlutterMacOS
+  - path_provider_macos (0.0.1):
+    - FlutterMacOS
+  - ZIPFoundation (0.9.11)
+
+DEPENDENCIES:
+  - desktop_window_utils (from `Flutter/ephemeral/.symlinks/plugins/desktop_window_utils/macos`)
+  - file_selector_macos (from `Flutter/ephemeral/.symlinks/plugins/file_selector_macos/macos`)
+  - flutter_archive (from `Flutter/ephemeral/.symlinks/plugins/flutter_archive/macos`)
+  - FlutterMacOS (from `Flutter/ephemeral`)
+  - menubar (from `Flutter/ephemeral/.symlinks/plugins/menubar/macos`)
+  - path_provider_macos (from `Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos`)
+
+SPEC REPOS:
+  trunk:
+    - ZIPFoundation
+
+EXTERNAL SOURCES:
+  desktop_window_utils:
+    :path: Flutter/ephemeral/.symlinks/plugins/desktop_window_utils/macos
+  file_selector_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/file_selector_macos/macos
+  flutter_archive:
+    :path: Flutter/ephemeral/.symlinks/plugins/flutter_archive/macos
+  FlutterMacOS:
+    :path: Flutter/ephemeral
+  menubar:
+    :path: Flutter/ephemeral/.symlinks/plugins/menubar/macos
+  path_provider_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos
+
+SPEC CHECKSUMS:
+  desktop_window_utils: ab67a32e0bb83da41fa19d8f9244795a1e65d69b
+  file_selector_macos: ff6dc948d4ddd34e8602a1f60b7d0b4cc6051a47
+  flutter_archive: 3505db9fe514c400c6310d752aed9bd457b6a8cf
+  FlutterMacOS: 57701585bf7de1b3fc2bb61f6378d73bbdea8424
+  menubar: 4e3d461d62d775540277ce6639acafe2a111a231
+  path_provider_macos: a0a3fd666cb7cd0448e936fb4abad4052961002b
+  ZIPFoundation: b1f0de4eed33e74a676f76e12559ab6b75990197
+
+PODFILE CHECKSUM: 829d8b790792cfd17d9ec98cd6f405265d79b926
+
+COCOAPODS: 1.10.1
