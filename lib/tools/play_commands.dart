@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 
 String constructPlayCommandFromMap(
     Map<String, dynamic> playMap, String filePath) {
-  String inputList = "amovie='$filePath':s=";
+  String inputList = '';
   int mapCount = 0;
   String mapList = '';
   String weights = '';
@@ -20,11 +20,12 @@ String constructPlayCommandFromMap(
     int startingIndex = track['startingIndex'];
     int chosenIndex = random.nextInt(track['length']) + startingIndex;
     if (mapCount != 0) {
-      inputList += '+';
       weights += '|';
     }
-    inputList += chosenIndex.toString();
+
+    inputList += "amovie='$filePath':s=${chosenIndex.toString()}";
     weights += track['level'].toString();
+    inputList += '[aid${mapCount.toString()}];';
     mapList += '[aid${mapCount.toString()}]';
     mapCount++;
   }
@@ -34,17 +35,18 @@ String constructPlayCommandFromMap(
 
   String extraOptions = '';
   String command =
-      '"$ffplay" -f lavfi "$inputList$mapList;${mapList}amix=inputs=${mapCount.toString()}:duration=longest:normalize=disable:weights=$weights" $printCommand $extraOptions -nodisp -autoexit';
+      '"$ffplay" -f lavfi "$inputList${mapList}amix=inputs=${mapCount.toString()}:duration=longest:normalize=disable:weights=$weights" $printCommand $extraOptions -nodisp -autoexit';
 
-  print(command);
   return command;
 }
 
 String amendSeekTime(String command, double seekPoint) {
   print('am I here? somewhere');
-  RegExp seekSegment = RegExp(r'.mka":(.*?)s=');
-  return command.replaceFirst(
-      seekSegment, '.mka":sp=${seekPoint.toString()}:s=');
+  RegExp seekSegment = RegExp(r".mka':(.*?)s=");
+  String newCommand = command.replaceAll(
+      seekSegment, ".mka':sp=${seekPoint.toString()}:s=");
+  print(newCommand);
+  return newCommand;
 }
 
 void pauseOtherTracks(BuildContext context, Track thisTrack) {
