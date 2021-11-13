@@ -23,9 +23,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  process_run: ^0.12.1
+  process_run: ^0.12.2+1
   file_selector: ^0.8.2
-  file_selector_macos: ^0.0.4
+  file_selector_macos: ^0.0.4+1
   path_provider: ^2.0.1
   flutter_archive: ^3.0.0
   uuid: ^3.0.4
@@ -36,8 +36,8 @@ dependencies:
     git:
       url: git://github.com/google/flutter-desktop-embedding.git
       path: plugins/menubar
-      ref: 85dde09
-  fl_chart: ^0.35.0
+      ref: e48abe7
+  fl_chart: ^0.40.0
 
 
   # The following adds the Cupertino Icons font to your application.

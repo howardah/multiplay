@@ -83,28 +83,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _exportTracks() async {
-    final path = await getSavePath(suggestedName: "project_name.mka");
-    if (path == null) return;
-    final File outFile = File(path);
-
-    Directory tempDir = await getTemporaryDirectory();
-    Directory sourceDir =
-        await Directory('${tempDir.path}/Export-${Uuid().v1()}').create();
-
-    setState(() {
-      _status = "Exporting!";
-    });
-
-    String shellCommand = await Provider.of<Mixer>(context, listen: false)
-        .exportString(outFile, sourceDir);
-    await shell.run(shellCommand);
-
-    print('deleting!');
-    setState(() {
-      _status = "";
-    });
-
-    await sourceDir.delete(recursive: true);
   }
 
   void _initShell() {
@@ -221,21 +199,13 @@ class _MyHomePageState extends State<MyHomePage> {
           SizedBox(
             width: 30.0,
           ),
-          FloatingActionButton(
-            onPressed: _exportTracks,
-            tooltip: 'Export',
-            child: Icon(Icons.save_alt_rounded),
-          ),
-          SizedBox(
-            width: 15.0,
-          ),
           Text(_status),
           Spacer(),
-          FloatingActionButton(
-            onPressed: _shellFunction,
-            tooltip: 'Shell Attempt',
-            child: Icon(Icons.code),
-          ),
+          // FloatingActionButton(
+          //   onPressed: _shellFunction,
+          //   tooltip: 'Shell Attempt',
+          //   child: Icon(Icons.code),
+          // ),
           SizedBox(
             width: 15.0,
           ),

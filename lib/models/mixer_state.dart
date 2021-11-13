@@ -64,18 +64,19 @@ class Mixer extends ChangeNotifier {
   }
 
   void play([double? seekPoint]) async {
-    _stopwatch.reset();
-    if (_playing) shell.kill();
-
-    _playing = true;
-    notifyListeners();
-    _stopwatch.start();
-    await shell.run(playString());
-
-    _stopwatch.stop();
-    print(_stopwatch.elapsed);
-    _playing = false;
-    notifyListeners();
+    if(tracks.length > 0) tracks[0].trackKey.currentState?.playPause();
+    // _stopwatch.reset();
+    // if (_playing) shell.kill();
+    //
+    // _playing = true;
+    // notifyListeners();
+    // _stopwatch.start();
+    // await shell.run(playString());
+    //
+    // _stopwatch.stop();
+    // print(_stopwatch.elapsed);
+    // _playing = false;
+    // notifyListeners();
   }
 
   String playString() {

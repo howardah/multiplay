@@ -45,6 +45,7 @@ Future<String> initializeApp(BuildContext context) async {
       '${(await getLibraryDirectory()).path}/Application Support/Multiplay/Cache');
   isConnected = await checkConnection();
 
+  if (await cacheDir.exists()) cacheDir.deleteSync(recursive: true);
   if (!(await toolsDir.exists())) await toolsDir.create(recursive: true);
   if (!(await cacheDir.exists())) await cacheDir.create(recursive: true);
 

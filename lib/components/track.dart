@@ -1,22 +1,30 @@
 import 'dart:async';
 import 'dart:core';
+import 'dart:io';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:multiplay/components/level_meter.dart';
 import 'package:multiplay/components/styled_icon_button.dart';
 import 'package:multiplay/globals/common.dart';
+import 'package:multiplay/tools/ffmpeg_commands.dart';
 import 'package:multiplay/tools/play_commands.dart';
 import 'package:multiplay/tools/get_json_attachment.dart';
 import 'package:multiplay/tools/toolbox.dart';
 import 'package:process_run/shell.dart';
 
 class Track extends StatefulWidget {
-  Track({Key? key, required this.file, this.level = 1.0, this.trackName})
+  Track(
+      {Key? key,
+      required this.file,
+      this.level = 1.0,
+      this.trackName,
+      this.cacheCount = 3})
       : super(key: key);
 
   final XFile file;
   final double level;
   final String? trackName;
+  final int cacheCount;
 
   @override
   TrackState createState() => TrackState();
@@ -25,6 +33,7 @@ class Track extends StatefulWidget {
 class TrackState extends State<Track> {
   Duration _duration = Duration();
   bool _playing = false;
+  bool _rendersReady = false;
   double _playHead = 0;
   List<double> _levels = List<double>.filled(2, -100.0);
   String _currentCommand = '';
@@ -35,6 +44,8 @@ class TrackState extends State<Track> {
   Shell? _shell;
   ShellLinesController _stdoutController = ShellLinesController();
   ShellLinesController _stderrController = ShellLinesController();
+  Stdin _stdinController = stdin;
+  List<String> preRenders = [];
 
   Future<void> _updateDuration() async {
     double durationInSeconds = await getDuration(widget.file.path, _shell);
@@ -54,6 +65,45 @@ class TrackState extends State<Track> {
     print(fileInfo);
     if (false) return; // ToDO: add validation
     info = fileInfo;
+    await preRendersRefill();
+    print(preRenders);
+  }
+
+  Future<int> preRendersRefill() async {
+    Map<String, dynamic>? infoNull = info;
+    if (infoNull == null) return 0;
+    int fillCount = 0;
+    while (preRenders.length < widget.cacheCount) {
+      preRenders.add(await makeCachedFile(infoNull, widget.file.path));
+      if (preRenders.length == 1) {
+        setState(() {
+          _rendersReady = true;
+        });
+      }
+      fillCount++;
+    }
+    return fillCount;
+  }
+
+  Future<bool> preRendersClear(int number) async {
+    List<String> toTrashPaths = preRenders.getRange(0, number).toList();
+    preRenders.removeRange(0, number);
+    for (String trashPath in toTrashPaths) {
+      File trashFile = new File(trashPath);
+      await trashFile.delete();
+    }
+    if (preRenders.length == 0) {
+      setState(() {
+        _rendersReady = false;
+      });
+    }
+    return true;
+  }
+
+  Future<bool> preRendersShift() async {
+    await preRendersClear(1);
+    await preRendersRefill();
+    return true;
   }
 
   Duration get duration => _duration;
@@ -79,11 +129,11 @@ class TrackState extends State<Track> {
       workingDirectory: toolsDir.path,
       stdout: _stdoutController.sink,
       stderr: _stderrController.sink,
+      // stdin: _stdinController
     );
   }
 
   void _initShell() {
-    print('Yello!');
     _renewShell();
     _stdout = _stdoutController.stream.listen((event) {
       // print('Length: ${event.length}');
@@ -135,19 +185,9 @@ class TrackState extends State<Track> {
     return true;
   }
 
-  //
-  // void _listenToShell() {
-  //   StreamSubscription? ss = _shellStream;
-  //   bool isPaused = ss != null ? ss.isPaused : false;
-  //   if (isPaused) {
-  //     _shellStream?.resume();
-  //   }
-  // }
-  //
-  // void _stopListenToShell() {
-  //   print('did this get called?');
-  //   _shellStream?.pause();
-  // }
+  void playPause() {
+    _playPause();
+  }
 
   Future<void> _playPause() async {
     // ToDO: Actual error handling;
@@ -162,7 +202,7 @@ class TrackState extends State<Track> {
     // _listenToShell();
 
     String command = _playHead == 0
-        ? constructPlayCommandFromMap(infoNull, widget.file.path)
+        ? playCommandFromFile(preRenders[0])
         : amendSeekTime(_currentCommand, _playHead);
 
     setState(() {
@@ -176,6 +216,7 @@ class TrackState extends State<Track> {
       _playing = false;
       _playHead = 0;
     });
+    preRendersShift();
   }
 
   void _stop() {
@@ -183,6 +224,7 @@ class TrackState extends State<Track> {
       _shell?.kill();
       _renewShell();
     }
+    preRendersShift();
 
     setState(() {
       _playing = false;
@@ -191,9 +233,16 @@ class TrackState extends State<Track> {
     });
   }
 
-  void destroy() {
+  @override
+  void dispose() {
+    super.dispose();
     _stdout?.cancel();
     _stderr?.cancel();
+    preRendersClear(preRenders.length);
+  }
+
+  void _testButton() {
+    _stdinController.readLineSync();
   }
 
   @override
@@ -219,14 +268,24 @@ class TrackState extends State<Track> {
               SizedBox(
                 width: 10.0,
               ),
-              IconButton(
-                  hoverColor: Colors.transparent,
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onPressed: _playPause,
-                  icon: Icon(!_playing
-                      ? Icons.play_arrow_rounded
-                      : Icons.pause_circle_filled_rounded)),
+              (_rendersReady)
+                  ? IconButton(
+                      hoverColor: Colors.transparent,
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      onPressed: _playPause,
+                      icon: Icon(!_playing
+                          ? Icons.play_arrow_rounded
+                          : Icons.pause_circle_filled_rounded))
+                  : IconButton(
+                      hoverColor: Colors.transparent,
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      onPressed: () {},
+                      icon: Icon(
+                        Icons.play_arrow_rounded,
+                        color: Colors.grey,
+                      )),
               SizedBox(width: 150.0, child: Text(widget.file.name)),
               SizedBox(
                 width: 10.0,

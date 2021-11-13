@@ -6,6 +6,14 @@ import 'package:multiplay/models/mixer_state.dart';
 import 'package:multiplay/models/track_models.dart';
 import 'package:provider/provider.dart';
 
+String playCommandFromFile(String filePath) {
+  String printCommand =
+      '-af astats=metadata=1:reset=1,ametadata=print:key=lavfi.astats.1.RMS_level,ametadata=print:key=lavfi.astats.2.RMS_level';
+  String command = '"$ffplay" "$filePath" $printCommand -nodisp -autoexit';
+
+  return command;
+}
+
 String constructPlayCommandFromMap(
     Map<String, dynamic> playMap, String filePath) {
   String inputList = '';
@@ -41,10 +49,17 @@ String constructPlayCommandFromMap(
 }
 
 String amendSeekTime(String command, double seekPoint) {
+  RegExp seekSegment = RegExp(r" -ss .*$");
+  String newCommand = command.replaceAll(seekSegment, "");
+  newCommand += ' -ss ${seekPoint.toString()}';
+  return newCommand;
+}
+
+String amendSeekTimeVieux(String command, double seekPoint) {
   print('am I here? somewhere');
   RegExp seekSegment = RegExp(r".mka':(.*?)s=");
-  String newCommand = command.replaceAll(
-      seekSegment, ".mka':sp=${seekPoint.toString()}:s=");
+  String newCommand =
+      command.replaceAll(seekSegment, ".mka':sp=${seekPoint.toString()}:s=");
   print(newCommand);
   return newCommand;
 }
